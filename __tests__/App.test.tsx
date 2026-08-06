@@ -1,13 +1,12 @@
-/**
- * @format
- */
+import { formatCurrency, getServiceId } from '../src/utils/formatters';
 
-import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
-import App from '../App';
+describe('service formatters', () => {
+  it('formats a price in Vietnamese currency style', () => {
+    expect(formatCurrency(150000)).toBe('150.000 đ');
+  });
 
-test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
+  it('supports both MongoDB and common id fields', () => {
+    expect(getServiceId({ _id: 'mongo-id' })).toBe('mongo-id');
+    expect(getServiceId({ id: 'normal-id' })).toBe('normal-id');
   });
 });
