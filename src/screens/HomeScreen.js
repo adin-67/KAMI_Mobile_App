@@ -4,7 +4,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import {
   Appbar,
   Avatar,
-  BottomNavigation,
   Button,
   Dialog,
   Divider,
@@ -22,40 +21,12 @@ import { useAuth } from '../context/AuthContext';
 import { getServices } from '../services/api';
 import { formatCurrency, getServiceId } from '../utils/formatters';
 
-const bottomRoutes = [
-  {
-    key: 'home',
-    title: 'Home',
-    focusedIcon: 'home',
-    unfocusedIcon: 'home-outline',
-  },
-  {
-    key: 'transaction',
-    title: 'Transaction',
-    focusedIcon: 'cash-multiple',
-    unfocusedIcon: 'cash',
-  },
-  {
-    key: 'customer',
-    title: 'Customer',
-    focusedIcon: 'account-group',
-    unfocusedIcon: 'account-group-outline',
-  },
-  {
-    key: 'setting',
-    title: 'Setting',
-    focusedIcon: 'cog',
-    unfocusedIcon: 'cog-outline',
-  },
-];
-
 function HomeScreen({ navigation }) {
   const { token, signOut } = useAuth();
   const [services, setServices] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
   const [message, setMessage] = React.useState('');
-  const [bottomIndex, setBottomIndex] = React.useState(0);
   const [logoutVisible, setLogoutVisible] = React.useState(false);
 
   const loadServices = React.useCallback(
@@ -91,16 +62,6 @@ function HomeScreen({ navigation }) {
       return;
     }
     navigation.navigate('ServiceDetail', { serviceId, service });
-  };
-
-  const handleBottomTab = ({ route }) => {
-    const nextIndex = bottomRoutes.findIndex(item => item.key === route.key);
-    if (route.key === 'home') {
-      setBottomIndex(0);
-      return;
-    }
-    setBottomIndex(nextIndex);
-    setMessage(`${route.title} chưa thuộc phạm vi chức năng của Lab 5.`);
   };
 
   const renderService = ({ item }) => (
@@ -178,19 +139,6 @@ function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate('AddService')}
         />
       </View>
-
-      <BottomNavigation.Bar
-        navigationState={{ index: bottomIndex, routes: bottomRoutes }}
-        onTabPress={handleBottomTab}
-        renderIcon={({ route, focused, color }) => (
-          <Icon
-            source={focused ? route.focusedIcon : route.unfocusedIcon}
-            size={24}
-            color={color}
-          />
-        )}
-        getLabelText={({ route }) => route.title}
-      />
 
       <Portal>
         <Dialog

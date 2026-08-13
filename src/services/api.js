@@ -46,6 +46,19 @@ const request = async (path, options = {}) => {
   return data;
 };
 
+const getArrayData = (data, propertyName) => {
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+  if (Array.isArray(data?.[propertyName])) {
+    return data[propertyName];
+  }
+  return [];
+};
+
 export const login = async (phone, password) => {
   const data = await request('/auth', {
     method: 'POST',
@@ -65,7 +78,7 @@ export const login = async (phone, password) => {
 
 export const getServices = async token => {
   const data = await request('/services', { token });
-  return Array.isArray(data) ? data : data?.data || data?.services || [];
+  return getArrayData(data, 'services');
 };
 
 export const getService = async (id, token) => {
@@ -85,3 +98,25 @@ export const updateService = (id, service, token) =>
 
 export const deleteService = (id, token) =>
   request(`/services/${id}`, { method: 'DELETE', token });
+
+export const getCustomers = async token => {
+  const data = await request('/customers', { token });
+  return getArrayData(data, 'customers');
+};
+
+export const addCustomer = (customer, token) =>
+  request('/customers', {
+    method: 'POST',
+    token,
+    body: customer,
+  });
+
+export const getTransactions = async token => {
+  const data = await request('/transactions', { token });
+  return getArrayData(data, 'transactions');
+};
+
+export const getTransaction = async (id, token) => {
+  const data = await request(`/transactions/${id}`, { token });
+  return data?.data || data;
+};
