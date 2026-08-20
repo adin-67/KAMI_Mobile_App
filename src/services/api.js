@@ -1,19 +1,31 @@
-import { API_BASE_URL } from '../constants/config';
+import { API_BASE_URL } from "../constants/config";
 
 const getErrorMessage = (data, status) => {
-  if (typeof data === 'string' && data.trim()) {
+  if (typeof data === "string" && data.trim()) {
     return data;
   }
 
-  return data?.message || data?.error || `Yêu cầu thất bại. Mã lỗi: ${status}`;
+  const validationMessage = Array.isArray(data?.errors)
+    ? data.errors
+        .map((item) => item.msg)
+        .filter(Boolean)
+        .join("\n")
+    : "";
+
+  return (
+    validationMessage ||
+    data?.message ||
+    data?.error ||
+    `Yêu cầu thất bại. Mã lỗi: ${status}`
+  );
 };
 
 const request = async (path, options = {}) => {
-  const { method = 'GET', token, body } = options;
-  const headers = { Accept: 'application/json' };
+  const { method = "GET", token, body } = options;
+  const headers = { Accept: "application/json" };
 
   if (body !== undefined) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -27,7 +39,7 @@ const request = async (path, options = {}) => {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new Error('Không thể kết nối máy chủ. Hãy kiểm tra Internet.');
+    throw new Error("Không thể kết nối máy chủ. Hãy kiểm tra Internet.");
   }
 
   const responseText = await response.text();
@@ -60,25 +72,25 @@ const getArrayData = (data, propertyName) => {
 };
 
 export const login = async (phone, password) => {
-  const data = await request('/auth', {
-    method: 'POST',
+  const data = await request("/auth", {
+    method: "POST",
     body: { phone: phone.trim(), password },
   });
   const token =
-    (typeof data === 'string' ? data : null) ||
+    (typeof data === "string" ? data : null) ||
     data?.token ||
     data?.accessToken ||
     data?.data?.token;
 
   if (!token) {
-    throw new Error('Đăng nhập thành công nhưng máy chủ không trả về token.');
+    throw new Error("Đăng nhập thành công nhưng máy chủ không trả về token.");
   }
   return token;
 };
 
-export const getServices = async token => {
-  const data = await request('/services', { token });
-  return getArrayData(data, 'services');
+export const getServices = async (token) => {
+  const data = await request("/services", { token });
+  return getArrayData(data, "services");
 };
 
 export const getService = async (id, token) => {
@@ -87,36 +99,61 @@ export const getService = async (id, token) => {
 };
 
 export const addService = (service, token) =>
-  request('/services', { method: 'POST', token, body: service });
+  request("/services", { method: "POST", token, body: service });
 
 export const updateService = (id, service, token) =>
   request(`/services/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token,
     body: service,
   });
 
 export const deleteService = (id, token) =>
-  request(`/services/${id}`, { method: 'DELETE', token });
+  request(`/services/${id}`, { method: "DELETE", token });
 
-export const getCustomers = async token => {
-  const data = await request('/customers', { token });
-  return getArrayData(data, 'customers');
+export const getCustomers = async (token) => {
+  const data = await request("/customers", { token });
+  return getArrayData(data, "customers");
+};
+
+export const getCustomer = async (id, token) => {
+  const data = await request(`/customers/${id}`, { token });
+  return data?.data || data;
 };
 
 export const addCustomer = (customer, token) =>
-  request('/customers', {
-    method: 'POST',
+  request("/customers", {
+    method: "POST",
     token,
     body: customer,
   });
 
-export const getTransactions = async token => {
-  const data = await request('/transactions', { token });
-  return getArrayData(data, 'transactions');
+export const updateCustomer = (id, customer, token) =>
+  request(`/customers/${id}`, {
+    method: "PUT",
+    token,
+    body: customer,
+  });
+
+export const deleteCustomer = (id, token) =>
+  request(`/customers/${id}`, { method: "DELETE", token });
+
+export const getTransactions = async (token) => {
+  const data = await request("/transactions", { token });
+  return getArrayData(data, "transactions");
 };
 
 export const getTransaction = async (id, token) => {
   const data = await request(`/transactions/${id}`, { token });
   return data?.data || data;
 };
+
+export const addTransaction = (transaction, token) =>
+  request("/transactions", {
+    method: "POST",
+    token,
+    body: transaction,
+  });
+
+export const cancelTransaction = (id, token) =>
+  request(`/transactions/${id}`, { method: "DELETE", token });

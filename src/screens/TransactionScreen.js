@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import * as React from "react";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
   Appbar,
@@ -10,26 +10,26 @@ import {
   Snackbar,
   Text,
   TouchableRipple,
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { getTransactions } from '../services/api';
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
+import { getTransactions } from "../services/api";
 import {
   formatCurrency,
   formatShortDateTime,
   getCustomerName,
   getTransactionId,
-} from '../utils/formatters';
+} from "../utils/formatters";
 
-const getServiceName = service =>
-  service?.name || service?.service?.name || 'Unnamed service';
+const getServiceName = (service) =>
+  service?.name || service?.service?.name || "Unnamed service";
 
 function TransactionScreen({ navigation }) {
   const { token } = useAuth();
   const [transactions, setTransactions] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
-  const [message, setMessage] = React.useState('');
+  const [message, setMessage] = React.useState("");
 
   const loadTransactions = React.useCallback(
     async (showRefresh = false) => {
@@ -48,28 +48,28 @@ function TransactionScreen({ navigation }) {
         setRefreshing(false);
       }
     },
-    [token],
+    [token]
   );
 
   useFocusEffect(
     React.useCallback(() => {
       loadTransactions();
-    }, [loadTransactions]),
+    }, [loadTransactions])
   );
 
-  const openDetail = transaction => {
+  const openDetail = (transaction) => {
     const transactionId = getTransactionId(transaction);
     if (!transactionId) {
-      setMessage('This transaction does not have an identifier.');
+      setMessage("This transaction does not have an identifier.");
       return;
     }
-    navigation.navigate('TransactionDetail', { transactionId, transaction });
+    navigation.navigate("TransactionDetail", { transactionId, transaction });
   };
 
   const renderTransaction = ({ item }) => {
     const services = Array.isArray(item.services) ? item.services : [];
-    const cancelled = String(item.status).toLowerCase() === 'cancelled';
-    const transactionCode = item.id || item.code || item._id || 'No code';
+    const cancelled = String(item.status).toLowerCase() === "cancelled";
+    const transactionCode = item.id || item.code || item._id || "No code";
 
     return (
       <TouchableRipple onPress={() => openDetail(item)}>
@@ -106,7 +106,7 @@ function TransactionScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appbar}>
         <Appbar.Content title="Transaction" titleStyle={styles.appbarTitle} />
       </Appbar.Header>
@@ -130,7 +130,7 @@ function TransactionScreen({ navigation }) {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => loadTransactions(true)}
-              colors={['#ef5069']}
+              colors={["#ef5069"]}
             />
           }
           ListEmptyComponent={
@@ -149,17 +149,13 @@ function TransactionScreen({ navigation }) {
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() =>
-          setMessage(
-            'The assignment does not provide an API to add transactions.',
-          )
-        }
+        onPress={() => navigation.navigate("AddTransaction")}
       />
 
       <Snackbar
         visible={Boolean(message)}
-        onDismiss={() => setMessage('')}
-        action={{ label: 'Close', onPress: () => setMessage('') }}
+        onDismiss={() => setMessage("")}
+        action={{ label: "Close", onPress: () => setMessage("") }}
       >
         {message}
       </Snackbar>
@@ -170,12 +166,12 @@ function TransactionScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff8f9',
+    backgroundColor: "#fff8f9",
   },
-  appbar: { backgroundColor: '#ef5069' },
+  appbar: { backgroundColor: "#ef5069" },
   appbarTitle: {
-    color: '#ffffff',
-    fontWeight: 'bold',
+    color: "#ffffff",
+    fontWeight: "bold",
   },
   list: {
     padding: 12,
@@ -184,44 +180,44 @@ const styles = StyleSheet.create({
   emptyList: { flexGrow: 1 },
   card: {
     marginBottom: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   headingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   code: {
     flex: 1,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   cancelled: {
-    color: '#d32f2f',
-    fontWeight: 'bold',
+    color: "#d32f2f",
+    fontWeight: "bold",
     marginLeft: 8,
   },
   bodyRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 6,
   },
   services: { flex: 1 },
   price: {
-    color: '#ef5069',
-    fontWeight: 'bold',
+    color: "#ef5069",
+    fontWeight: "bold",
     marginLeft: 12,
   },
   customer: {
-    color: '#76565b',
+    color: "#76565b",
     marginTop: 6,
   },
   center: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   statusText: { marginTop: 12 },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     right: 20,
     bottom: 20,
   },

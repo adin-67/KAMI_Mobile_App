@@ -1,16 +1,19 @@
-import * as React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, Text } from 'react-native-paper';
-import { useAuth } from '../context/AuthContext';
-import MainScreen from './MainScreen';
-import AddCustomerScreen from '../screens/AddCustomerScreen';
-import AddServiceScreen from '../screens/AddServiceScreen';
-import EditServiceScreen from '../screens/EditServiceScreen';
-import LoginScreen from '../screens/LoginScreen';
-import ServiceDetailScreen from '../screens/ServiceDetailScreen';
-import TransactionDetailScreen from '../screens/TransactionDetailScreen';
+import * as React from "react";
+import { StyleSheet, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { ActivityIndicator, Text } from "react-native-paper";
+import { useAuth } from "../context/AuthContext";
+import MainScreen from "./MainScreen";
+import AddCustomerScreen from "../screens/AddCustomerScreen";
+import AddServiceScreen from "../screens/AddServiceScreen";
+import AddTransactionScreen from "../screens/AddTransactionScreen";
+import CustomerDetailScreen from "../screens/CustomerDetailScreen";
+import EditCustomerScreen from "../screens/EditCustomerScreen";
+import EditServiceScreen from "../screens/EditServiceScreen";
+import LoginScreen from "../screens/LoginScreen";
+import ServiceDetailScreen from "../screens/ServiceDetailScreen";
+import TransactionDetailScreen from "../screens/TransactionDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +45,15 @@ function AppNavigator() {
             <Stack.Screen name="EditService" component={EditServiceScreen} />
             <Stack.Screen name="AddCustomer" component={AddCustomerScreen} />
             <Stack.Screen
+              name="CustomerDetail"
+              component={CustomerDetailScreen}
+            />
+            <Stack.Screen name="EditCustomer" component={EditCustomerScreen} />
+            <Stack.Screen
+              name="AddTransaction"
+              component={AddTransactionScreen}
+            />
+            <Stack.Screen
               name="TransactionDetail"
               component={TransactionDetailScreen}
             />
@@ -57,8 +69,8 @@ function AppNavigator() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingText: { marginTop: 12 },
 });

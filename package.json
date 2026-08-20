@@ -17,6 +17,8 @@
     "@react-navigation/native-stack": "^7.18.7",
     "react": "19.2.3",
     "react-native": "0.86.2",
+    "react-native-bouncy-checkbox": "^4.1.4",
+    "react-native-element-dropdown": "^2.12.4",
     "react-native-paper": "^5.15.3",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.26.2"

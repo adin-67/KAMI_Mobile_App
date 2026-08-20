@@ -1,29 +1,33 @@
-import * as React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import * as React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import {
   ActivityIndicator,
   Appbar,
+  Button,
+  Dialog,
   Divider,
+  Menu,
+  Portal,
   Snackbar,
   Surface,
   Text,
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext';
-import { getTransaction } from '../services/api';
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
+import { cancelTransaction, getTransaction } from "../services/api";
 import {
   formatCurrency,
   formatDateTime,
   getCustomerName,
-} from '../utils/formatters';
+} from "../utils/formatters";
 
-const getServices = transaction =>
+const getServices = (transaction) =>
   Array.isArray(transaction?.services) ? transaction.services : [];
 
-const getServiceName = service =>
-  service?.name || service?.service?.name || 'Unnamed service';
+const getServiceName = (service) =>
+  service?.name || service?.service?.name || "Unnamed service";
 
-const getServicePrice = service =>
+const getServicePrice = (service) =>
   service?.price ?? service?.service?.price ?? 0;
 
 function InformationRow({ label, value, strong = false }) {
@@ -39,10 +43,13 @@ function TransactionDetailScreen({ navigation, route }) {
   const { token } = useAuth();
   const { transactionId, transaction: initialTransaction } = route.params;
   const [transaction, setTransaction] = React.useState(
-    initialTransaction || null,
+    initialTransaction || null
   );
   const [loading, setLoading] = React.useState(!initialTransaction);
-  const [error, setError] = React.useState('');
+  const [cancelling, setCancelling] = React.useState(false);
+  const [menuVisible, setMenuVisible] = React.useState(false);
+  const [dialogVisible, setDialogVisible] = React.useState(false);
+  const [error, setError] = React.useState("");
 
   React.useEffect(() => {
     const loadTransaction = async () => {
@@ -74,19 +81,54 @@ function TransactionDetailScreen({ navigation, route }) {
       ? Number(payment) - Number(amount)
       : Number(transaction.discount);
 
+  const handleCancel = async () => {
+    try {
+      setCancelling(true);
+      await cancelTransaction(transactionId, token);
+      setDialogVisible(false);
+      navigation.goBack();
+    } catch (cancelError) {
+      setDialogVisible(false);
+      setError(cancelError.message);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <Appbar.Header style={styles.appbar}>
         <Appbar.BackAction color="#ffffff" onPress={navigation.goBack} />
         <Appbar.Content
           title="Transaction detail"
           titleStyle={styles.appbarTitle}
         />
-        <Appbar.Action
-          icon="dots-vertical"
-          color="#ffffff"
-          onPress={() => setError('No additional action is required in Lab 6.')}
-        />
+        <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={
+            <Appbar.Action
+              icon="dots-vertical"
+              color="#ffffff"
+              onPress={() => setMenuVisible(true)}
+            />
+          }
+        >
+          <Menu.Item
+            leadingIcon="information-outline"
+            onPress={() => setMenuVisible(false)}
+            title="See more details"
+          />
+          <Divider />
+          <Menu.Item
+            leadingIcon="cancel"
+            onPress={() => {
+              setMenuVisible(false);
+              setDialogVisible(true);
+            }}
+            title="Cancel transaction"
+          />
+        </Menu>
       </Appbar.Header>
 
       {loading && !transaction ? (
@@ -105,7 +147,7 @@ function TransactionDetailScreen({ navigation, route }) {
                 transaction?.id ||
                 transaction?.code ||
                 transaction?._id ||
-                'No code'
+                "No code"
               }
               strong
             />
@@ -176,10 +218,41 @@ function TransactionDetailScreen({ navigation, route }) {
         </ScrollView>
       )}
 
+      <Portal>
+        <Dialog
+          visible={dialogVisible}
+          onDismiss={() => setDialogVisible(false)}
+        >
+          <Dialog.Icon icon="alert" />
+          <Dialog.Title style={styles.dialogTitle}>Warning</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Are you sure you want to cancel this transaction? This operation
+              cannot be returned.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              onPress={() => setDialogVisible(false)}
+              disabled={cancelling}
+            >
+              No
+            </Button>
+            <Button
+              onPress={handleCancel}
+              loading={cancelling}
+              disabled={cancelling}
+            >
+              Yes
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
       <Snackbar
         visible={Boolean(error)}
-        onDismiss={() => setError('')}
-        action={{ label: 'Close', onPress: () => setError('') }}
+        onDismiss={() => setError("")}
+        action={{ label: "Close", onPress: () => setError("") }}
       >
         {error}
       </Snackbar>
@@ -190,78 +263,79 @@ function TransactionDetailScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff8f9',
+    backgroundColor: "#fff8f9",
   },
-  appbar: { backgroundColor: '#ef5069' },
+  appbar: { backgroundColor: "#ef5069" },
   appbarTitle: {
-    color: '#ffffff',
-    fontWeight: 'bold',
+    color: "#ffffff",
+    fontWeight: "bold",
   },
   center: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   content: { padding: 12 },
   section: {
     padding: 14,
     marginBottom: 12,
     borderRadius: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   sectionTitle: {
-    color: '#ef5069',
-    fontWeight: 'bold',
+    color: "#ef5069",
+    fontWeight: "bold",
     marginBottom: 10,
   },
   informationRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   label: {
     flex: 1,
-    color: '#76565b',
+    color: "#76565b",
   },
   value: {
     flex: 1.2,
-    textAlign: 'right',
+    textAlign: "right",
   },
-  strongValue: { fontWeight: 'bold' },
+  strongValue: { fontWeight: "bold" },
   serviceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   serviceName: { flex: 1 },
   quantity: {
     width: 40,
-    color: '#76565b',
-    textAlign: 'center',
+    color: "#76565b",
+    textAlign: "center",
   },
   servicePrice: {
     width: 105,
-    textAlign: 'right',
-    fontWeight: 'bold',
+    textAlign: "right",
+    fontWeight: "bold",
   },
   emptyServices: {
-    color: '#76565b',
+    color: "#76565b",
     marginBottom: 10,
   },
   divider: { marginVertical: 8 },
   paymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 6,
   },
   paymentLabel: {
     flex: 1,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   paymentValue: {
-    color: '#ef5069',
+    color: "#ef5069",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
+  dialogTitle: { textAlign: "center" },
 });
 
 export default TransactionDetailScreen;
